@@ -1,6 +1,7 @@
 import type { Route } from '../App';
-import { IconArrowRight, IconCamera, IconGithub, IconUpload, Logo } from './icons';
-import { useI18n } from './i18n';
+import { LANGS, type Lang } from '../app/format';
+import { IconArrowRight, IconCamera, IconGithub, IconGlobe, IconUpload, Logo } from './icons';
+import { LANG_NAMES, useI18n } from './i18n';
 
 export const REPO_URL = 'https://github.com/universe-coder/qr-drop';
 
@@ -14,15 +15,20 @@ export function HomeScreen({ onNavigate }: { onNavigate: (route: Route) => void 
           <Logo />
           <span className="brand__name">{t.app.title}</span>
         </div>
-        <button
-          type="button"
-          className="chip"
-          onClick={() => setLang(lang === 'ru' ? 'en' : 'ru')}
-          aria-label={t.common.language}
-          title={t.common.language}
-        >
-          {t.common.languageShort}
-        </button>
+        <label className="lang-select">
+          <IconGlobe />
+          <select
+            value={lang}
+            onChange={(event) => setLang(event.target.value as Lang)}
+            aria-label={t.common.languageLabel}
+          >
+            {LANGS.map((code) => (
+              <option key={code} value={code} lang={code}>
+                {LANG_NAMES[code]}
+              </option>
+            ))}
+          </select>
+        </label>
       </header>
 
       <section className="hero">

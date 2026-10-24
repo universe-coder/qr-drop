@@ -1,6 +1,21 @@
-/** Форматирование чисел для интерфейса на обоих языках. */
+/**
+ * Форматирование чисел для интерфейса на всех языках приложения.
+ *
+ * Формы слов для длительностей берутся из Intl: правила множественного числа
+ * в арабском (шесть форм) или французском вручную воспроизводить незачем.
+ * Русский оставлен на своей таблице — у него короткий хвост «2 минуты 15 с»,
+ * которого Intl не даёт. Цифры везде латинские: счётчики на экране набраны
+ * моноширинным шрифтом, и восточноарабские цифры там смотрелись бы чужими.
+ */
 
-export type Lang = 'ru' | 'en';
+export type Lang = 'ru' | 'en' | 'zh' | 'ar' | 'fr';
+
+export const LANGS: readonly Lang[] = ['en', 'ru', 'zh', 'ar', 'fr'];
+
+/** Языки с письмом справа налево. */
+export function isRtl(lang: Lang): boolean {
+  return lang === 'ar';
+}
 
 /** Выбор формы слова по русским правилам: 1 файл, 2 файла, 5 файлов. */
 export function plural(count: number, one: string, few: string, many: string): string {
@@ -12,38 +27,69 @@ export function plural(count: number, one: string, few: string, many: string): s
   return many;
 }
 
-const UNITS = {
+const UNITS: Record<Lang, { b: string; kb: string; mb: string; perSecond: string }> = {
   ru: { b: 'Б', kb: 'КБ', mb: 'МБ', perSecond: '/с' },
   en: { b: 'B', kb: 'KB', mb: 'MB', perSecond: '/s' },
-} as const;
+  zh: { b: 'B', kb: 'KB', mb: 'MB', perSecond: '/秒' },
+  ar: { b: 'بايت', kb: 'ك.ب', mb: 'م.ب', perSecond: '/ث' },
+  fr: { b: 'o', kb: 'Ko', mb: 'Mo', perSecond: '/s' },
+};
 
-export function formatBytes(bytes: number, lang: Lang): string {
-  const unit = UNITS[lang];
-  if (bytes < 1024) return `${bytes} ${unit.b}`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(bytes < 10 * 1024 ? 1 : 0)} ${unit.kb}`;
-  return `${(bytes / (1024 * 1024)).toFixed(1)} ${unit.mb}`;
+function decimal(value: number, digits: number, lang: Lang): string {
+  return new Intl.NumberFormat(lang, {
+    minimumFractionDigits: digits,
+    maximumFractionDigits: digits,
+    numberingSystem: 'latn',
+  }).format(value);
 }
 
-function unitWord(count: number, lang: Lang, ru: [string, string, string], en: [string, string]): string {
-  return lang === 'ru' ? plural(count, ...ru) : count === 1 ? en[0] : en[1];
+function unit(value: number, name: 'second' | 'minute' | 'hour', display: 'long' | 'short', lang: Lang): string {
+  return new Intl.NumberFormat(lang, {
+    style: 'unit',
+    unit: name,
+    unitDisplay: display,
+    numberingSystem: 'latn',
+  }).format(value);
+}
+
+export function formatBytes(bytes: number, lang: Lang): string {
+  const names = UNITS[lang];
+  if (bytes < 1024) return `${bytes} ${names.b}`;
+  if (bytes < 1024 * 1024) return `${decimal(bytes / 1024, bytes < 10 * 1024 ? 1 : 0, lang)} ${names.kb}`;
+  return `${decimal(bytes / (1024 * 1024), 1, lang)} ${names.mb}`;
 }
 
 export function formatDuration(seconds: number, lang: Lang): string {
   const total = Math.max(0, Math.round(seconds));
-  if (total < 60) {
-    return `${total} ${unitWord(total, lang, ['секунда', 'секунды', 'секунд'], ['second', 'seconds'])}`;
-  }
+  if (lang === 'ru') return formatDurationRu(total);
+
+  // Китайский пишет единицы слитно: «2分钟15秒».
+  const gap = lang === 'zh' ? '' : ' ';
+  if (total < 60) return unit(total, 'second', 'long', lang);
 
   const minutes = Math.floor(total / 60);
   const rest = total % 60;
   if (minutes < 60) {
-    const head = `${minutes} ${unitWord(minutes, lang, ['минута', 'минуты', 'минут'], ['minute', 'minutes'])}`;
-    return rest >= 10 ? `${head} ${rest} ${lang === 'ru' ? 'с' : 's'}` : head;
+    const head = unit(minutes, 'minute', 'long', lang);
+    return rest >= 10 ? `${head}${gap}${unit(rest, 'second', 'short', lang)}` : head;
   }
 
   const hours = Math.floor(minutes / 60);
-  const hoursWord = unitWord(hours, lang, ['час', 'часа', 'часов'], ['hour', 'hours']);
-  return `${hours} ${hoursWord} ${minutes % 60} ${lang === 'ru' ? 'мин' : 'min'}`;
+  return `${unit(hours, 'hour', 'long', lang)}${gap}${unit(minutes % 60, 'minute', 'short', lang)}`;
+}
+
+function formatDurationRu(total: number): string {
+  if (total < 60) return `${total} ${plural(total, 'секунда', 'секунды', 'секунд')}`;
+
+  const minutes = Math.floor(total / 60);
+  const rest = total % 60;
+  if (minutes < 60) {
+    const head = `${minutes} ${plural(minutes, 'минута', 'минуты', 'минут')}`;
+    return rest >= 10 ? `${head} ${rest} с` : head;
+  }
+
+  const hours = Math.floor(minutes / 60);
+  return `${hours} ${plural(hours, 'час', 'часа', 'часов')} ${minutes % 60} мин`;
 }
 
 /** Короткая форма для счётчиков, которые обновляются каждую секунду. */
@@ -55,9 +101,9 @@ export function formatClock(seconds: number): string {
 
 export function formatSpeed(bytesPerSecond: number, lang: Lang): string {
   if (!Number.isFinite(bytesPerSecond) || bytesPerSecond <= 0) return '—';
-  const unit = UNITS[lang];
-  if (bytesPerSecond < 1024) return `${Math.round(bytesPerSecond)} ${unit.b}${unit.perSecond}`;
-  return `${(bytesPerSecond / 1024).toFixed(1)} ${unit.kb}${unit.perSecond}`;
+  const names = UNITS[lang];
+  if (bytesPerSecond < 1024) return `${Math.round(bytesPerSecond)} ${names.b}${names.perSecond}`;
+  return `${decimal(bytesPerSecond / 1024, 1, lang)} ${names.kb}${names.perSecond}`;
 }
 
 export function formatPercent(value: number): string {

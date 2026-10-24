@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import type { Lang } from './app/format';
+import { isRtl, type Lang } from './app/format';
 import { HomeScreen } from './ui/HomeScreen';
 import { DICTIONARIES, detectLang, I18nContext, rememberLang } from './ui/i18n';
 import { ReceiveScreen } from './ui/ReceiveScreen';
@@ -40,6 +40,7 @@ export function App() {
 
   useEffect(() => {
     document.documentElement.lang = lang;
+    document.documentElement.dir = isRtl(lang) ? 'rtl' : 'ltr';
     document.title = route === 'home' ? 'QR Drop' : `${DICTIONARIES[lang][route].title} · QR Drop`;
   }, [lang, route]);
 

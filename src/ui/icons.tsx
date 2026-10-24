@@ -6,9 +6,10 @@ interface IconProps {
   size?: number;
 }
 
-function Svg({ size = 24, children }: IconProps & { children: React.ReactNode }) {
+function Svg({ size = 24, flip, children }: IconProps & { flip?: boolean; children: React.ReactNode }) {
   return (
     <svg
+      className={flip ? 'icon-flip' : undefined}
       width={size}
       height={size}
       viewBox="0 0 24 24"
@@ -24,15 +25,23 @@ function Svg({ size = 24, children }: IconProps & { children: React.ReactNode })
   );
 }
 
+/** Стрелки отражаются в письме справа налево — см. `.icon-flip` в стилях. */
 export const IconArrowLeft = (props: IconProps) => (
-  <Svg {...props}>
+  <Svg {...props} flip>
     <path d="M19 12H5M11 18l-6-6 6-6" />
   </Svg>
 );
 
 export const IconArrowRight = (props: IconProps) => (
-  <Svg {...props}>
+  <Svg {...props} flip>
     <path d="M5 12h14M13 6l6 6-6 6" />
+  </Svg>
+);
+
+export const IconGlobe = (props: IconProps) => (
+  <Svg size={16} {...props}>
+    <circle cx="12" cy="12" r="9" />
+    <path d="M3 12h18M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.6-3.8-9S9.5 5.6 12 3Z" />
   </Svg>
 );
 

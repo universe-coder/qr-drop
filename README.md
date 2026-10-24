@@ -16,7 +16,7 @@ file ◄── SHA-256 ◄── assembly ◄── frames ◄── jsQR
 
 - Works offline after the first visit (service worker), nothing is ever uploaded.
 - Sending works in any modern browser. Receiving needs a camera and HTTPS.
-- English and Russian UI, light and dark themes.
+- UI in English, Russian, Chinese, Arabic (right-to-left) and French; light and dark themes.
 - Built-in self-test (`#/selftest`) runs the whole pipeline in the browser, except the camera.
 
 ## Why it works without a back channel
@@ -96,6 +96,7 @@ src/
   platform/       camera, wake lock, saving, vibration
   app/            hooks and state
   ui/             screens, i18n, small component kit
+    locales/        one dictionary per language, all typed against ru.ts
 ```
 
 - **Sending.** Frames are generated in a worker, 12 ahead. Display follows a `requestAnimationFrame` tick counter, not the clock: a frame must live a whole number of screen refreshes, otherwise a swap eventually lands mid-refresh and the camera captures half of the old frame and half of the new one.
