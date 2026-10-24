@@ -1,5 +1,7 @@
 # QR Drop
 
+**English** · [Русский](README.ru.md) · [中文](README.zh.md) · [العربية](README.ar.md) · [Français](README.fr.md)
+
 **Send a file from one device to another through a stream of QR codes.** One screen plays an endless sequence of codes, the other device films it and reassembles the file. No server, no network, no pairing: just a screen and a lens.
 
 **Live:** https://universe-coder.github.io/qr-drop/
@@ -122,7 +124,7 @@ npm run build     # static site in dist/
 
 The camera only works over HTTPS or on `localhost`. To test receiving on a phone, serve the dev build over HTTPS (for example via a tunnel) or use the deployed site.
 
-`npm run check` runs 70 tests, including loopback transfers with 20/50/70% frame loss, reception starting mid-stream, a binary round-trip through real QR codes rasterized to pixels and read back by jsQR, and corruption of every single frame byte being caught by the CRC.
+`npm run check` runs the test suite, including loopback transfers with 20/50/70% frame loss, reception starting mid-stream, a binary round-trip through real QR codes rasterized to pixels and read back by jsQR, and corruption of every single frame byte being caught by the CRC.
 
 ## Deployment
 
