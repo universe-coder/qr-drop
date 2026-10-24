@@ -4,7 +4,7 @@
 
 **Live:** https://universe-coder.github.io/qr-drop/
 
-[Русский](#по-русски) · MIT License
+[MIT License](LICENSE)
 
 <table>
   <tr>
@@ -135,15 +135,3 @@ GitHub Pages is set up in [`.github/workflows/pages.yml`](.github/workflows/page
 - **jsQR rather than zxing-wasm.** zxing-wasm is about twice as fast, but pulls a WASM file that loads from a CDN by default. For an app whose whole point is working offline, that is a bad deal.
 - **The sender cannot see the receiver's progress.** The channel is one-way, and pretending otherwise would be dishonest. The send screen shows its own time and pass number and says to watch progress on the other device.
 - **Native `BarcodeDetector` is not used.** It only returns `rawValue`, a string, not bytes.
-
----
-
-## По-русски
-
-QR Drop передаёт файл между двумя устройствами через поток QR-кодов: один экран показывает бесконечную последовательность кодов, второе устройство снимает её камерой и собирает файл. Без сервера, сети и сопряжения. После первого открытия работает офлайн.
-
-Открыть: https://universe-coder.github.io/qr-drop/
-
-Под капотом фонтанное кодирование (LT): приёмнику нужны любые `K·(1+ε)` кадров, а не все подряд, поэтому пропуски камеры не страшны. Целостность проверяется CRC-32C на каждом кадре и SHA-256 на всём файле. Подробности протокола, формата кадра и профилей выше.
-
-Разработка: `npm install`, `npm run dev`, проверки `npm run check`, сборка статики `npm run build`. Публикация на GitHub Pages идёт автоматически при пуше в `main`.
