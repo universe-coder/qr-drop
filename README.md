@@ -6,6 +6,15 @@
 
 [Русский](#по-русски) · MIT License
 
+<table>
+  <tr>
+    <td align="center"><img src="docs/screenshots/home.png" width="200" alt="Home screen"><br><sub>Home</sub></td>
+    <td align="center"><img src="docs/screenshots/transmit.png" width="200" alt="Sender showing a stream of QR codes"><br><sub>Sending</sub></td>
+    <td align="center"><img src="docs/screenshots/receive.png" width="200" alt="Receiver assembling the file from the camera"><br><sub>Receiving</sub></td>
+    <td align="center"><img src="docs/screenshots/received.png" width="200" alt="File received and verified"><br><sub>Done</sub></td>
+  </tr>
+</table>
+
 ```
 file ──► blocks ──► fountain frames ──► QR ──► screen
                                                  │

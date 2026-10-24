@@ -101,7 +101,16 @@ export function ReceiveScreen({ onBack }: { onBack: () => void }) {
           </div>
         </StateCard>
 
-        {previewUrl && <img className="result-preview" src={previewUrl} alt={result.name} />}
+        {previewUrl && (
+          <img
+            className="result-preview"
+            src={previewUrl}
+            alt={result.name}
+            // Тип взят из имени файла у отправителя: «картинка» может оказаться
+            // чем угодно, и битый значок вместо превью только пугает.
+            onError={() => setPreviewUrl(null)}
+          />
+        )}
 
         {toast && <Toast message={toast} onClose={closeToast} />}
       </div>
